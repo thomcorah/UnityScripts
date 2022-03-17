@@ -14,6 +14,11 @@ public class Avatar : MonoBehaviour
 
     [SerializeField]
     float movementSpeed =10.0f;
+    
+    // We create a public camera variable so that we can point this script towards
+    // the camera. This is so that we can rotate it. Make sure to drag the camera
+    // object onto this variable in the Unity UI.
+    public Camera cam;
 
     private void Start()
     {
@@ -50,20 +55,51 @@ public class Avatar : MonoBehaviour
         transform.position += vertical * transform.forward * Time.deltaTime * movementSpeed;
         transform.position += horizontal * transform.right * Time.deltaTime * movementSpeed;
 
-        // We handle rotation of the avatar by getting the mouse input. 
-        float rotAmountX = Input.GetAxis("Mouse X") * mouseSensitivity;
-        float rotAmountY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+        /* We handle rotation of the avatar by getting the mouse input. 
+         * For the mouse, the X axis is horizontal, and the Y axis is vertical.
+         *
+         * We're going to use the X axis (horizontal) to change the rotation of the avatar
+         * object around its Y axis. This means that as we look left and right with the mouse,
+         * we are actually turning the avatar left or right. When we then move forward, this will
+         * be in the direction we're looking. 
+         *
+         * The vertical movement of the mouse however (Y axis) will be used to rotate the camera
+         * around its X axis, so that we can look up and down. We rotate the camera and not the 
+         * avatar.
+         * 
+         * First up, the horizontal axis.
+         */
         
-        /* To apply this rotation, we create a new Vector3. We set the z rotation to 0, and then 
-         * set the x and y rotation based on what we got from the mouse.
+        float rotAmountX = Input.GetAxis("Mouse X") * mouseSensitivity;
+        
+        /* To apply this rotation, we create a new Vector3. We set the z and x rotation to 0, and then 
+         * set the y rotation based on what we got from the mouse.
          * This Vector3 then gets used to set the rotation of the object. 
          */
         Vector3 rotation;
         rotation.z = 0;
-        rotation.x = -rotAmountY;
+        rotation.x = 0;
         rotation.y = rotAmountX;
 
         transform.Rotate(rotation);
+        
+        /* Now to rotate the camera to be able to look up and down. 
+         * This is the same kind of process, but approached a slightly 
+         * different way.
+         * A key think to note here is that we ADD the mouse movement
+         * to the current rotation.
+         */
+        
+        float rotAmountY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+ 
+        // Get the current camera rotation
+        Vector3 camRotation = cam.transform.eulerAngles;
+        
+        // Add our rotation amount to the x axis
+        camRotation.x += -rotAmountY;
+        
+        // Set the camera rotation to the updated vector3
+        cam.transform.eulerAngles = camRotation;
 
       } 
 
